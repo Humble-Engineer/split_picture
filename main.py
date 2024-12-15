@@ -1,6 +1,7 @@
 import cv2
 import os
-import shutil
+
+# pyinstaller --name=split_picture --onefile main.py
 
 def draw_cut_lines_and_circles(image, rows, cols, circle_radius_ratio=0.40):
     height, width = image.shape[:2]
@@ -43,18 +44,22 @@ def split_image(image_path, rows, cols):
     # 显示带有切割线和圆的图像
     cv2.imshow('Image with cut lines and circles', image_with_lines_and_circles)
     
+    print("按下“c”键保存切割图像...")
+
     # 等待用户输入
     key = cv2.waitKey(0) & 0xFF
     
     # 处理用户输入
     if key == ord('c'):  # 按下 "c" 键
+
         cv2.destroyAllWindows()
         
         # 创建输出文件夹，如果存在则先删除
         output_folder = 'output'
         if os.path.exists(output_folder):
-            shutil.rmtree(output_folder)
-        os.makedirs(output_folder)
+            pass
+        else:
+            os.makedirs(output_folder)
         
         # 分割图像
         for i in range(rows):
@@ -75,6 +80,9 @@ def split_image(image_path, rows, cols):
                 # 保存分割后的图像
                 filename = f'circle_{i+1}_{j+1}.jpg'
                 cv2.imwrite(os.path.join(output_folder, filename), sub_image)
+
+        print("图像已保存...")
+        
     else:
         cv2.destroyAllWindows()
         print("无效的按键，程序已退出")
