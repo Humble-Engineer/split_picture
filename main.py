@@ -36,7 +36,7 @@ def split_image(image_path, rows, cols):
     # 计算每个小块的高度和宽度
     row_height = height // rows
     col_width = width // cols
-    circle_radius_ratio = 0.30
+    circle_radius_ratio = 0.3
     
     # 绘制切割线和圆
     image_with_lines_and_circles = draw_cut_lines_and_circles(image.copy(), rows, cols, circle_radius_ratio)
@@ -76,13 +76,33 @@ def split_image(image_path, rows, cols):
                 
                 # 裁剪图像
                 sub_image = image[start_row:end_row, start_col:end_col]
-                
+
+                # 计算子图的平均灰度值
+                gray_sub_image = cv2.cvtColor(sub_image, cv2.COLOR_BGR2GRAY)
+                average_gray_value = cv2.mean(gray_sub_image)[0]
+
+                # 将平均灰度值转换为字符串
+                text = f'{average_gray_value:.2f}'
+
+                # 在子图的左上角绘制文本
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = 0.5
+                font_color = (0, 0, 255)
+                thickness = 1
+                line_type = cv2.LINE_AA
+
+                # 文本位置
+                text_position = (5, 20)
+
+                # 绘制文本
+                cv2.putText(sub_image, text, text_position, font, font_scale, font_color, thickness, line_type)
+
                 # 保存分割后的图像
-                filename = f'circle_{i+1}_{j+1}.jpg'
+                filename = f'{i+1}-{j+1}.jpg'
                 cv2.imwrite(os.path.join(output_folder, filename), sub_image)
 
         print("图像已保存...")
-        
+
     else:
         cv2.destroyAllWindows()
         print("无效的按键，程序已退出")
