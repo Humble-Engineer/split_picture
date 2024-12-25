@@ -36,7 +36,7 @@ def split_image(image_path, rows, cols):
     # 计算每个小块的高度和宽度
     row_height = height // rows
     col_width = width // cols
-    circle_radius_ratio = 0.3
+    circle_radius_ratio = 0.15
     
     # 绘制切割线和圆
     image_with_lines_and_circles = draw_cut_lines_and_circles(image.copy(), rows, cols, circle_radius_ratio)
@@ -86,7 +86,7 @@ def split_image(image_path, rows, cols):
 
                 # 在子图的左上角绘制文本
                 font = cv2.FONT_HERSHEY_SIMPLEX
-                font_scale = 0.5
+                font_scale = 0.3
                 font_color = (0, 0, 255)
                 thickness = 1
                 line_type = cv2.LINE_AA
