@@ -1,7 +1,8 @@
+# 打包命令：pyinstaller --name=split_picture --onefile main.py
+
 import cv2
 import os
-
-# pyinstaller --name=split_picture --onefile main.py
+import datetime
 
 def draw_cut_lines_and_circles(image, rows, cols, circle_radius_ratio=0.40):
     height, width = image.shape[:2]
@@ -26,7 +27,7 @@ def draw_cut_lines_and_circles(image, rows, cols, circle_radius_ratio=0.40):
     
     return image
 
-def split_image(image_path, rows, cols):
+def split_image(image_path, rows, cols, output_subfolder):
     # 读取图像
     image = cv2.imread(image_path)
     
@@ -44,7 +45,7 @@ def split_image(image_path, rows, cols):
     # 显示带有切割线和圆的图像
     cv2.imshow('Image with cut lines and circles', image_with_lines_and_circles)
     
-    print("按下“c”键保存切割图像...")
+    print("按下“c”键保存,其它任意键退出...",end="\n")
 
     # 等待用户输入
     key = cv2.waitKey(0) & 0xFF
@@ -54,11 +55,9 @@ def split_image(image_path, rows, cols):
 
         cv2.destroyAllWindows()
         
-        # 创建输出文件夹，如果存在则先删除
-        output_folder = 'output'
-        if os.path.exists(output_folder):
-            pass
-        else:
+        # 创建输出子文件夹
+        output_folder = os.path.join('output', output_subfolder)
+        if not os.path.exists(output_folder):
             os.makedirs(output_folder)
         
         # 分割图像
@@ -101,11 +100,38 @@ def split_image(image_path, rows, cols):
                 filename = f'{i+1}-{j+1}.jpg'
                 cv2.imwrite(os.path.join(output_folder, filename), sub_image)
 
-        print("图像已保存...")
+        print("图像已保存到", output_folder)
 
     else:
         cv2.destroyAllWindows()
-        print("无效的按键，程序已退出")
+        print("程序已退出...")
 
-# 调用函数
-split_image('real_img.png', 4, 6)  # 将图像切成m行n列
+def list_files(directory):
+    valid_extensions = ['.jpg', '.png', '.jpeg', '.bmp', '.gif']  # 添加更多合法的图片格式
+    return [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f)) and os.path.splitext(f)[1].lower() in valid_extensions]
+
+if __name__ == '__main__':
+    
+    # 列出当前目录下的所有合法图片文件
+    files = list_files('.')
+    if not files:
+        print("当前目录下没有合法的图片文件。")
+        exit(1)
+    
+    print("当前目录下的图片文件:")
+    for idx, file in enumerate(files):
+        print(f"{idx + 1}: {file}")
+    
+    # 用户选择文件
+    file_choice = int(input("请输入要分割的文件编号: ")) - 1
+    image_path = files[file_choice]
+    
+    # 用户输入行数和列数
+    rows = int(input("请输入分割的行数: "))
+    cols = int(input("请输入分割的列数: "))
+    
+    # 生成基于时间戳的子文件夹名称
+    timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+    output_subfolder = f'{timestamp}'
+    
+    split_image(image_path, rows, cols, output_subfolder)

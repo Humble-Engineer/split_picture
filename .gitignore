@@ -1,4 +1,4 @@
 /build
 /dist
-/output/*.jpg
+/output
 *.spec
