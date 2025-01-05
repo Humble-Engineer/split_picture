@@ -1,5 +1,3 @@
-# 打包命令：pyinstaller --name=split_picture --onefile main.py
-
 import cv2
 import os
 import datetime
@@ -112,19 +110,24 @@ def list_files(directory):
 
 if __name__ == '__main__':
     
-    # 列出当前目录下的所有合法图片文件
-    files = list_files('.')
-    if not files:
-        print("当前目录下没有合法的图片文件。")
+    # 修改为从 samples 文件夹中列出图像文件
+    samples_directory = 'samples'
+    if not os.path.exists(samples_directory):
+        print(f"{samples_directory} 文件夹不存在，请创建该文件夹并放入图片文件。")
         exit(1)
     
-    print("当前目录下的图片文件:")
+    files = list_files(samples_directory)
+    if not files:
+        print(f"{samples_directory} 文件夹下没有合法的图片文件。")
+        exit(1)
+    
+    print(f"{samples_directory} 文件夹下的图片文件:")
     for idx, file in enumerate(files):
         print(f"{idx + 1}: {file}")
     
     # 用户选择文件
     file_choice = int(input("请输入要分割的文件编号: ")) - 1
-    image_path = files[file_choice]
+    image_path = os.path.join(samples_directory, files[file_choice])
     
     # 用户输入行数和列数
     rows = int(input("请输入分割的行数: "))
