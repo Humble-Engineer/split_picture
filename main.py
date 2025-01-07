@@ -2,7 +2,7 @@ import cv2
 import os
 import datetime
 
-def draw_cut_lines_and_circles(image, rows, cols, circle_radius_ratio=0.40):
+def draw_cut_lines_and_circles(image, rows, cols, circle_r=0.40):
     height, width = image.shape[:2]
     row_height = height // rows
     col_width = width // cols
@@ -20,12 +20,12 @@ def draw_cut_lines_and_circles(image, rows, cols, circle_radius_ratio=0.40):
         for j in range(cols):
             center_x = j * col_width + col_width // 2
             center_y = i * row_height + row_height // 2
-            radius = int(min(row_height, col_width) * circle_radius_ratio)
+            radius = int(min(row_height, col_width) * circle_r)
             cv2.circle(image, (center_x, center_y), radius, (0, 0, 255), 2)
     
     return image
 
-def split_image(image_path, rows, cols, output_subfolder):
+def split_image(image_path, rows, cols, circle_r, output_subfolder):
     # 读取图像
     image = cv2.imread(image_path)
     
@@ -35,10 +35,9 @@ def split_image(image_path, rows, cols, output_subfolder):
     # 计算每个小块的高度和宽度
     row_height = height // rows
     col_width = width // cols
-    circle_radius_ratio = 0.15
     
     # 绘制切割线和圆
-    image_with_lines_and_circles = draw_cut_lines_and_circles(image.copy(), rows, cols, circle_radius_ratio)
+    image_with_lines_and_circles = draw_cut_lines_and_circles(image.copy(), rows, cols, circle_r)
     
     # 显示带有切割线和圆的图像
     cv2.imshow('Image with cut lines and circles', image_with_lines_and_circles)
@@ -63,7 +62,7 @@ def split_image(image_path, rows, cols, output_subfolder):
             for j in range(cols):
                 center_x = j * col_width + col_width // 2
                 center_y = i * row_height + row_height // 2
-                radius = int(min(row_height, col_width) * circle_radius_ratio)
+                radius = int(min(row_height, col_width) * circle_r)
                 
                 # 计算圆的边界
                 start_row = max(center_y - radius, 0)
@@ -79,7 +78,7 @@ def split_image(image_path, rows, cols, output_subfolder):
                 average_gray_value = cv2.mean(gray_sub_image)[0]
 
                 # 将平均灰度值转换为字符串
-                text = f'{average_gray_value:.2f}'
+                text = f'{average_gray_value:.4g}'
 
                 # 在子图的左上角绘制文本
                 font = cv2.FONT_HERSHEY_SIMPLEX
@@ -88,8 +87,12 @@ def split_image(image_path, rows, cols, output_subfolder):
                 thickness = 1
                 line_type = cv2.LINE_AA
 
-                # 文本位置
-                text_position = (5, 20)
+                # 获取子图像的高度和宽度
+                sub_height, sub_width = sub_image.shape[:2]
+                # print(f'Sub-image size: {sub_height}x{sub_width}')
+
+                # 设置文本位置为子图像的左上角，适当调整以避免文本超出边界
+                text_position = (0, int(0.1*sub_height)+5)
 
                 # 绘制文本
                 cv2.putText(sub_image, text, text_position, font, font_scale, font_color, thickness, line_type)
@@ -132,9 +135,11 @@ if __name__ == '__main__':
     # 用户输入行数和列数
     rows = int(input("请输入分割的行数: "))
     cols = int(input("请输入分割的列数: "))
+
+    circle_r = float(input("请输入圆的直径与子图边长的比例（建议0.1-0.2）: "))
     
     # 生成基于时间戳的子文件夹名称
     timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
     output_subfolder = f'{timestamp}'
     
-    split_image(image_path, rows, cols, output_subfolder)
+    split_image(image_path, rows, cols, circle_r, output_subfolder)
